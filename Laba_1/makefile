@@ -1,14 +1,25 @@
-CC = gcc
-RELEASE = -std=c11 -pedantic -W -Wall -Wextra -Werror
-DEBUG = -g -ggdb -std=c11 -pedantic -W -Wall -Wextra
+C = gcc
+CFLAGS_COMMON = -std=c11 -pedantic -W -Wall -Wextra
+CFLAGS_DEBUG = $(CFLAGS_COMMON) -g -ggdb
+CFLAGS_RELEASE = $(CFLAGS_COMMON) -Werror
 
-.PHONY: clean release debug
+SRCS = dirwalk.c
+OBJS = $(SRCS:.c=.o)
+EXEC = dirwalk
 
-all: release
+.PHONY: all clean
 
-release: dirwalk.c makefile
-	$(CC) $(RELEASE) dirwalk.c -o dirwalk
-debug: dirwalk.c makefile
-	$(CC) $(DEBUG) dirwalk.c -o dirwalk_debug
+all: $(EXEC)
+
+$(EXEC): $(OBJS)
+ifeq ($(MODE),debug)
+	$(CC) $(CFLAGS_DEBUG) $(OBJS) -o $(EXEC)
+else
+	$(CC) $(CFLAGS_RELEASE) $(OBJS) -o $(EXEC)
+endif
+
+%.o: %.c
+	$(CC) $(CFLAGS_COMMON) -c $< -o $@
+
 clean:
-	rm -f dirwalk dirwalk_debug
+	rm -f $(OBJS) $(EXEC)
